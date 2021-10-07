@@ -4,7 +4,7 @@ function main() {
 
 	let browser;
 	let url = "https://www.reddit.com/r/test/comments/agi5zf/test/";
-	let selector = 'div._1z5rdmX8TDr6mqwNv7A70U:nth-child(2) ';
+	let selector = 'div._1z5rdmX8TDr6mqwNv7A70U:nth-child(2)';
 
 	(async () => {
 		browser = await puppeteer.launch({
@@ -14,23 +14,24 @@ function main() {
 				"--disable-setuid-sandbox",
 				"--disable-accelerated-2d-canvas",
 				"--disable-gpu",
+				"--disable-notifications",
 			],
 			ignoreHTTPSErrors: true,
+			defaultViewport: null,
 			headless: false,
 		});
 		const [page] = await browser.pages();
 
 		await page.goto(url, {
-			waitUntil: 'networkidle0',
+			waitUntil: 'domcontentloaded',
 		});
 
 		await page.waitForSelector(selector, { visible: true });
 		const commentResults = await page.evaluate((selector) =>
 			[...document.querySelectorAll(selector)].map((e) => ({
 				text: e.querySelector("._1qeIAgB0cPwnLhDF9XSiJM").innerText,
-				username: e.querySelector("._13ScjOmi6dGdJw0JAonQEr").innerText,
+				username: e.querySelector("._2mHuuvyV9doV3zwbZPtIPG").innerText,
 				upvotes: e.querySelector("._1rZYMD_4xY3gRcSS3p8ODO").innerText,
-
 			})), selector
 		);
 
