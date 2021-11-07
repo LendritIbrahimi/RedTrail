@@ -1,44 +1,66 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-extra")
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+puppeteer.use(StealthPlugin())
+
+
+//SCROLL FUNCTION
+async function scroll(page, length) {
+  await page.evaluate(async (length) => {
+    await new Promise((resolve, reject) => {
+      var totalHeight = -1*Math.abs(length);
+      var distance = 5;
+      var timer = setInterval(() => {
+        window.scrollBy(0, distance);
+        totalHeight += distance;
+
+        if (totalHeight > 0) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 5);
+    });
+  }, length);
+}
+
+
+//SLEEP FUNCTION
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function main() {
+  let browser;
+  (async () => {
+    //CREATE BROWSER
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--start-maximized'],
+      headless: false
+    })
 
-	let browser;
-	let url = "https://www.reddit.com/r/test/comments/agi5zf/test/";
-	let selector = 'div._1z5rdmX8TDr6mqwNv7A70U:nth-child(2)';
+    //GO TO A REDDIT POST / NEEDS TO BE AUTOMATED IN THE FUTURE
+    const [page] = await browser.pages();
+    await page.goto("https://www.reddit.com/r/AskReddit/comments/q03m1p/whats_something_you_think_we_can_all_agree_on/");
 
-	(async () => {
-		browser = await puppeteer.launch({
-			args: [
-				"--ignore-certificate-errors",
-				"--no-sandbox",
-				"--disable-setuid-sandbox",
-				"--disable-accelerated-2d-canvas",
-				"--disable-gpu",
-				"--disable-notifications",
-			],
-			ignoreHTTPSErrors: true,
-			defaultViewport: null,
-			headless: false,
-		});
-		const [page] = await browser.pages();
+    //ACTIVATE DARK MODE
+    await page.waitForSelector('#USER_DROPDOWN_ID', { visible: true });
+    await page.click("#USER_DROPDOWN_ID");
+    await page.waitForSelector('._2KotRmn9DgdA58Ikji2mnV', { visible: true });
+    await page.click("._2KotRmn9DgdA58Ikji2mnV");
 
-		await page.goto(url, {
-			waitUntil: 'domcontentloaded',
-		});
+    //FETCH PARENT POSTS & THEIR INFOS
+    await page.waitForSelector("div._1z5rdmX8TDr6mqwNv7A70U:nth-child(2)", { visible: true });
+    const commentResults = await page.evaluate(() =>
+      [...document.querySelectorAll("div._1z5rdmX8TDr6mqwNv7A70U:nth-child(2)")].map((e) => ({
+        text: e.querySelector("._1qeIAgB0cPwnLhDF9XSiJM").innerText,
+        username: e.querySelector("._23wugcdiaj44hdfugIAlnX").innerText,
+        upvotes: e.querySelector("._1rZYMD_4xY3gRcSS3p8ODO").innerText,
+      }))
+    );
 
-		await page.waitForSelector(selector, { visible: true });
-		const commentResults = await page.evaluate((selector) =>
-			[...document.querySelectorAll(selector)].map((e) => ({
-				text: e.querySelector("._1qeIAgB0cPwnLhDF9XSiJM").innerText,
-				username: e.querySelector("._2mHuuvyV9doV3zwbZPtIPG").innerText,
-				upvotes: e.querySelector("._1rZYMD_4xY3gRcSS3p8ODO").innerText,
-			})), selector
-		);
-
-		console.log(commentResults);
-	})()
-		.catch((err) => console.log(err))
-		.finally(async () => await browser.close());
+    console.log(commentResults);
+  })()
+    .catch((e) => console.log(e))
+    .finally(async () => await browser.close());
 }
 
 main();
