@@ -1,8 +1,8 @@
 const ImageDataURI = require('image-data-uri');
 const fabric = require("fabric").fabric;
 
+async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePicture) {
 
-async function CreateContent(Content, Username, PostTime, Upvotes, ProfilePicture) {
   //Create canvas
   var canvas = new fabric.StaticCanvas('canvas', {
     height: 1920,
@@ -10,14 +10,14 @@ async function CreateContent(Content, Username, PostTime, Upvotes, ProfilePictur
     backgroundColor: '#141414'
   });
 
+  //Register font
   fabric.nodeCanvas.registerFont(__dirname + '/assets/fonts/OpenSans-Regular.ttf', {
     family: 'OpenSans'
   });
 
-  //#region Content
-  //Add text
+
+  //For the content height which we will use to determine the top and bottom sections
   var txtContent = new fabric.Textbox(Content, {
-    fill: 'white',
     originY: "center",
     top: canvas.height * 0.5,
     left: 35,
@@ -26,9 +26,6 @@ async function CreateContent(Content, Username, PostTime, Upvotes, ProfilePictur
     width: canvas.getWidth() - 80,
     fontFamily: 'OpenSans'
   });
-
-  canvas.add(txtContent);
-  //#endregion
 
   //#region Top
   var crcAvatarBackground = new fabric.Circle({
@@ -40,7 +37,7 @@ async function CreateContent(Content, Username, PostTime, Upvotes, ProfilePictur
   })
   canvas.add(crcAvatarBackground);
 
-  await new Promise(resolve => {
+  await new Promise((resolve, reject) => {
     fabric.Image.fromURL(ProfilePicture, (img) => {
       img.set({
         originY: "bottom",
@@ -51,11 +48,10 @@ async function CreateContent(Content, Username, PostTime, Upvotes, ProfilePictur
       img.scaleToHeight(crcAvatarBackground.radius * 2.25);
       img.scaleToWidth(crcAvatarBackground.radius * 2.25);
       canvas.add(img);
-      resolve();
     });
+    resolve("Avatar fetched successfully.");
   });
 
-  // await addImage(canvas, ProfilePicture, );
   //Add username
   var txtUsername = new fabric.Textbox(Username, {
     fill: '#8e8e8e',
@@ -151,9 +147,40 @@ async function CreateContent(Content, Username, PostTime, Upvotes, ProfilePictur
   });
   canvas.add(polDownArrow, polUpArrow, txtUpvotes);
   //#endregion
+  const ContentSegments = Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).filter(e => e);
+  var ContentSegmentAdded = '';
+  ContentSegments.forEach((segment, index) => {
+    ContentSegmentAdded += segment;
+    GenerateCommentSegment(canvas, ContentSegmentAdded, txtContent.height, index);
+  });
+}
 
-  canvas.renderAll();
+async function GenerateCommentSegment(canvas, Content, ContentHeight, index) {
 
+  //#region Content
+  //Add text
+  var txtContent = new fabric.Textbox(Content, {
+    fill: 'white',
+    originY: "top",
+    top: canvas.height * 0.5 - ContentHeight * 0.5,
+    left: 35, //+ index * 5, - to test if the previous content is fully removed.
+    fontSize: 38,
+    lineHeight: 1.1,
+    width: canvas.getWidth() - 80,
+    height: ContentHeight,
+    fontFamily: 'OpenSans'
+  });
+
+  canvas.add(txtContent);
+  //#endregion
+
+  await DataURLtoPNG(canvas, "image_" + index);
+
+  //not working for some reason
+  canvas.remove(txtContent);
+}
+
+async function DataURLtoPNG(canvas, name) {
   //Return DataURL from canvas
   const dataURL = canvas.toDataURL({
     width: canvas.width,
@@ -164,11 +191,10 @@ async function CreateContent(Content, Username, PostTime, Upvotes, ProfilePictur
   });
 
   //Output
-  ImageDataURI.outputFile(dataURL, "image.png");
+  ImageDataURI.outputFile(dataURL, name + '.png');
 }
-
-// CreateContent("Here i have written something. Here i have written very something else.\n\nTesting bench one two three. One Two Three Four Five.",
-//   "hellomyusername", "15m", "1.5k",
-//   "https://styles.redditmedia.com/t5_50qpes/styles/profileIcon_snoo78944d19-7998-4dd1-8b34-df9a8b6ba99c-headshot.png");
+GenerateComment("abcde.\nabcde.",
+  "hellomyusername", "15m", "1.5k",
+  "https://styles.redditmedia.com/t5_50qpes/styles/profileIcon_snoo78944d19-7998-4dd1-8b34-df9a8b6ba99c-headshot.png");
 
 
