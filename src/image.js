@@ -1,10 +1,14 @@
 const ImageDataURI = require('image-data-uri');
 const fabric = require("fabric").fabric;
 
+
+
+
+
 async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePicture) {
 
   //Create canvas
-  var canvas = new fabric.StaticCanvas('canvas', {
+  const canvas = new fabric.StaticCanvas('canvas', {
     height: 1920,
     width: 1080,
     backgroundColor: '#141414'
@@ -17,7 +21,7 @@ async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePict
 
 
   //For the content height which we will use to determine the top and bottom sections
-  var txtContent = new fabric.Textbox(Content, {
+  let txtContent = new fabric.Textbox(Content, {
     originY: "center",
     top: canvas.height * 0.5,
     left: 35,
@@ -26,9 +30,11 @@ async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePict
     width: canvas.getWidth() - 80,
     fontFamily: 'OpenSans'
   });
+  const txtContentHeight = txtContent.height;
+
 
   //#region Top
-  var crcAvatarBackground = new fabric.Circle({
+  const crcAvatarBackground = new fabric.Circle({
     fill: '#232323',
     radius: 44,
     originY: "center",
@@ -53,7 +59,7 @@ async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePict
   });
 
   //Add username
-  var txtUsername = new fabric.Textbox(Username, {
+  const txtUsername = new fabric.Textbox(Username, {
     fill: '#8e8e8e',
     originY: "center",
     top: crcAvatarBackground.top,
@@ -63,7 +69,7 @@ async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePict
     fontWeight: 600
   });
 
-  var crcDevider = new fabric.Circle({
+  const crcDevider = new fabric.Circle({
     fill: '#8e8e8e',
     radius: 4,
     originY: "center",
@@ -71,7 +77,7 @@ async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePict
     top: txtUsername.top
   });
 
-  var txtPostTime = new fabric.Textbox(PostTime, {
+  const txtPostTime = new fabric.Textbox(PostTime, {
     fill: '#8e8e8e',
     originY: "center",
     top: crcDevider.top,
@@ -84,7 +90,7 @@ async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePict
   //#endregion
 
   //#region Bottom
-  var txtUpvotes = new fabric.Textbox(Upvotes, {
+  const txtUpvotes = new fabric.Textbox(Upvotes, {
     fill: '#8e8e8e',
     top: txtContent.top + txtContent.height / 2 + 50,
     left: txtContent.width - 120,
@@ -147,37 +153,29 @@ async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePict
   });
   canvas.add(polDownArrow, polUpArrow, txtUpvotes);
   //#endregion
-  const ContentSegments = Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).filter(e => e);
-  var ContentSegmentAdded = '';
-  ContentSegments.forEach((segment, index) => {
-    ContentSegmentAdded += segment;
-    GenerateCommentSegment(canvas, ContentSegmentAdded, txtContent.height, index);
-  });
-}
 
-async function GenerateCommentSegment(canvas, Content, ContentHeight, index) {
-
-  //#region Content
-  //Add text
-  var txtContent = new fabric.Textbox(Content, {
+  txtContent.set({
     fill: 'white',
     originY: "top",
-    top: canvas.height * 0.5 - ContentHeight * 0.5,
-    left: 35, //+ index * 5, - to test if the previous content is fully removed.
-    fontSize: 38,
-    lineHeight: 1.1,
-    width: canvas.getWidth() - 80,
-    height: ContentHeight,
-    fontFamily: 'OpenSans'
-  });
-
+    top: canvas.height * 0.5 - txtContentHeight * 0.5,
+    height: txtContentHeight,
+  })
   canvas.add(txtContent);
-  //#endregion
 
-  await DataURLtoPNG(canvas, "image_" + index);
+  const ContentSegments = Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).filter(e => e);
+  var ContentSegmentAdded = '';
 
-  //not working for some reason
-  canvas.remove(txtContent);
+  ContentSegments.forEach((segment, index) => {
+    ContentSegmentAdded += segment;
+    txtContent.set('text', ContentSegmentAdded);
+
+    DataURLtoPNG(canvas, "image_" + index);
+  });
+  console.log(JSON.stringify(canvas));
+}
+
+async function GenerateTitle(Content, Username, PostTime, Upvotes, Comments) {
+
 }
 
 async function DataURLtoPNG(canvas, name) {
@@ -193,7 +191,7 @@ async function DataURLtoPNG(canvas, name) {
   //Output
   ImageDataURI.outputFile(dataURL, name + '.png');
 }
-GenerateComment("abcde.\nabcde.",
+GenerateComment("abcde.\nabcde. hello days gim tsa.",
   "hellomyusername", "15m", "1.5k",
   "https://styles.redditmedia.com/t5_50qpes/styles/profileIcon_snoo78944d19-7998-4dd1-8b34-df9a8b6ba99c-headshot.png");
 
