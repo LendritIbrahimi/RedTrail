@@ -1,66 +1,37 @@
-const puppeteer = require("puppeteer-extra")
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
-
-
-//SCROLL FUNCTION
-async function scroll(page, length) {
-  await page.evaluate(async (length) => {
-    await new Promise((resolve, reject) => {
-      var totalHeight = -1*Math.abs(length);
-      var distance = 5;
-      var timer = setInterval(() => {
-        window.scrollBy(0, distance);
-        totalHeight += distance;
-
-        if (totalHeight > 0) {
-          clearInterval(timer);
-          resolve();
-        }
-      }, 5);
-    });
-  }, length);
-}
-
-
-//SLEEP FUNCTION
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+import { ArgumentHandler } from "./src/models/ArgumentHandler.js";
+import Snoowrap from "snoowrap";
+import { Fetcher } from "./src/models/Fetcher.js";
+import { GenerateComment } from "./src/models/image/ImageComment.js";
 
 function main() {
-  let browser;
-  (async () => {
-    //CREATE BROWSER
-    browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--start-maximized'],
-      headless: false
-    })
+  const options = new ArgumentHandler().options;
 
-    //GO TO A REDDIT POST / NEEDS TO BE AUTOMATED IN THE FUTURE
-    const [page] = await browser.pages();
-    await page.goto("https://www.reddit.com/r/AskReddit/comments/q03m1p/whats_something_you_think_we_can_all_agree_on/");
+  const wrapper = new Snoowrap({
+    userAgent: "Reddit/1.0.0",
+    clientId: options.clientId,
+    clientSecret: options.clientSecret,
+    username: options.username,
+    password: options.password,
+  });
 
-    //ACTIVATE DARK MODE
-    await page.waitForSelector('#USER_DROPDOWN_ID', { visible: true });
-    await page.click("#USER_DROPDOWN_ID");
-    await page.waitForSelector('._2KotRmn9DgdA58Ikji2mnV', { visible: true });
-    await page.click("._2KotRmn9DgdA58Ikji2mnV");
+  // A promise that contains fetched posts and comments
+  const fetcher = new Fetcher(options).fetch(wrapper);
 
-    //FETCH PARENT POSTS & THEIR INFOS
-    await page.waitForSelector("div._1z5rdmX8TDr6mqwNv7A70U:nth-child(2)", { visible: true });
-    const commentResults = await page.evaluate(() =>
-      [...document.querySelectorAll("div._1z5rdmX8TDr6mqwNv7A70U:nth-child(2)")].map((e) => ({
-        text: e.querySelector("._1qeIAgB0cPwnLhDF9XSiJM").innerText,
-        username: e.querySelector("._23wugcdiaj44hdfugIAlnX").innerText,
-        upvotes: e.querySelector("._1rZYMD_4xY3gRcSS3p8ODO").innerText,
-      }))
-    );
-
-    console.log(commentResults);
-  })()
-    .catch((e) => console.log(e))
-    .finally(async () => await browser.close());
+  /* This part tests the comment generation
+  const fetcher = new Fetcher(options).fetch(wrapper).then((data) => {
+    const comments = data.forEach((entity) => {
+      entity.comments.forEach((comment) => {
+        GenerateComment(
+          comment.text,
+          comment.author,
+          comment.ups,
+          "1.5k",
+          "https://styles.redditmedia.com/t5_50qpes/styles/profileIcon_snoo78944d19-7998-4dd1-8b34-df9a8b6ba99c-headshot.png"
+        );
+      });
+    });
+  });
+  */
 }
 
 main();
