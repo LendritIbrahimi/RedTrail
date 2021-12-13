@@ -2,7 +2,7 @@ import { fabric } from "fabric";
 import ImageDataURI from "image-data-uri";
 import { properties } from "./ImageProperties.js";
 
-export async function GenerateComment(Content, Username, PostTime, Upvotes, ProfilePicture) {
+export async function GenerateComment(content, username, postTime, upvotes, profilePicture) {
   //Create canvas
   var canvas = new fabric.StaticCanvas("canvas", properties.canvas);
 
@@ -10,7 +10,7 @@ export async function GenerateComment(Content, Username, PostTime, Upvotes, Prof
   fabric.nodeCanvas.registerFont("src/assets/fonts/OpenSans-Regular.ttf", properties.font);
 
   //For the content height which we will use to determine the top and bottom sections
-  var txtContent = new fabric.Textbox(Content, {
+  var txtContent = new fabric.Textbox(content, {
     ...properties.txtContent,
     width: canvas.width - 80,
     top: canvas.height * 0.5,
@@ -23,7 +23,7 @@ export async function GenerateComment(Content, Username, PostTime, Upvotes, Prof
     top: txtContent.top - txtContent.height / 2 - 75,
   });
 
-  fabric.Image.fromURL(ProfilePicture, (img) => {
+  fabric.Image.fromURL(profilePicture, (img) => {
     img.set({
       originY: "bottom",
       originX: "center",
@@ -36,7 +36,7 @@ export async function GenerateComment(Content, Username, PostTime, Upvotes, Prof
   });
 
   //Add username
-  var txtUsername = new fabric.Textbox(Username, {
+  var txtUsername = new fabric.Textbox(username, {
     ...properties.txtUsername,
     top: crcAvatarBackground.top,
     left: crcAvatarBackground.left + crcAvatarBackground.width + 25,
@@ -48,7 +48,7 @@ export async function GenerateComment(Content, Username, PostTime, Upvotes, Prof
     top: txtUsername.top,
   });
 
-  var txtPostTime = new fabric.Textbox(PostTime, {
+  var txtPostTime = new fabric.Textbox(postTime, {
     ...properties.txtPostTime,
     left: crcDevider.left + crcDevider.width + 15,
     width: canvas.width - 60,
@@ -57,7 +57,7 @@ export async function GenerateComment(Content, Username, PostTime, Upvotes, Prof
   //#endregion
 
   //#region Bottom
-  var txtUpvotes = new fabric.Textbox(Upvotes, {
+  var txtUpvotes = new fabric.Textbox(upvotes, {
     ...properties.txtUpVotes,
     top: txtContent.top + txtContent.height / 2 + 50,
     left: txtContent.width - 120,
@@ -80,32 +80,14 @@ export async function GenerateComment(Content, Username, PostTime, Upvotes, Prof
   canvas.add(txtUsername, txtPostTime, crcDevider, polDownArrow, polUpArrow, txtUpvotes, crcAvatarBackground);
 
   //#endregion
-  Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {
+  Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {  
     const newAcc = acc + element;
 
-    GenerateCommentSegment(canvas, newAcc, txtContent.height, index);
+    txtContent.set('text', newAcc);
+    DataURLtoPNG(canvas, "image_" + index);
 
     return newAcc;
   }, "");
-}
-
-async function GenerateCommentSegment(canvas, Content, ContentHeight, index) {
-  //#region Content
-  //Add text
-  var txtContent = new fabric.Textbox(Content, {
-    ...properties.segment.txtContent,
-    width: canvas.width - 80,
-    top: canvas.height * 0.5 - ContentHeight * 0.5,
-    height: ContentHeight,
-  });
-
-  canvas.add(txtContent);
-  //#endregion
-
-  await DataURLtoPNG(canvas, "images/image_" + index + Math.random() * 100);
-
-  //not working for some reason
-  canvas.remove(txtContent);
 }
 
 async function DataURLtoPNG(canvas, name) {
