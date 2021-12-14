@@ -1,9 +1,8 @@
 import { fabric } from "fabric";
-import { Textbox } from "fabric/fabric-impl";
 import ImageDataURI from "image-data-uri";
 import { properties } from "./ImageProperties.js";
 
-export async function GenerateComment(content, username, postTime, upvotes, profilePicture) {
+export async function ImageGenerator(content, username, postTime, upvotes, profilePicture) {
   //Create canvas
   var canvas = new fabric.StaticCanvas("canvas", properties.canvas);
 
@@ -78,14 +77,26 @@ export async function GenerateComment(content, username, postTime, upvotes, prof
     top: txtUpvotes.top,
     left: txtUpvotes.left - txtUpvotes.width,
   });
-  canvas.add(txtUsername, txtPostTime, crcDevider, polDownArrow, polUpArrow, txtUpvotes, crcAvatarBackground);
+
+  txtContent.set({ originY: "top", top: canvas.height * 0.5 - txtContent.height * 0.5 });
+
+  canvas.add(
+    txtContent,
+    txtUsername,
+    txtPostTime,
+    crcDevider,
+    polDownArrow,
+    polUpArrow,
+    txtUpvotes,
+    crcAvatarBackground
+  );
 
   //#endregion
-  Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {
+  content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {
     const newAcc = acc + element;
 
-    txtContent.set('text', newAcc);
-    DataURLtoPNG(canvas, "image_" + index);
+    txtContent.set("text", newAcc);
+    DataURLtoPNG(canvas, "output/image_" + index);
 
     return newAcc;
   }, "");

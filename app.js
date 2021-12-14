@@ -1,7 +1,7 @@
 import { ArgumentHandler } from "./src/models/ArgumentHandler.js";
 import Snoowrap from "snoowrap";
 import { Fetcher } from "./src/models/Fetcher.js";
-import { GenerateComment } from "./src/models/image/ImageComment.js";
+import { ImageGenerator } from "./src/models/image/ImageGenerator.js";
 import { SoundGenerator } from "./src/models/sound/SoundGenerator.js";
 
 function main() {
@@ -21,13 +21,13 @@ function main() {
 
   const fetcher = new Fetcher(options).fetch(wrapper).then((data) => {
     const comments = data.forEach((entity) => {
-      entity.comments.forEach((comment) => {
-        // soundGenerator.generate("oneTest", "test.mp3");
+      entity.comments.forEach((comment, index) => {
+        // soundGenerator.generate(comment.text, `test${index}.mp3`);
 
-        GenerateComment(
+        ImageGenerator(
           comment.text,
           comment.author,
-          comment.ups,
+          comment.ups.toString(),
           "1.5k",
           "https://styles.redditmedia.com/t5_50qpes/styles/profileIcon_snoo78944d19-7998-4dd1-8b34-df9a8b6ba99c-headshot.png"
         );

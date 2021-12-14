@@ -8,7 +8,8 @@ const properties = {
     family: "OpenSans",
   },
   txtContent: {
-    originY: "center",
+    fill: "white",
+    originY: "top",
     left: 35,
     fontSize: 38,
     lineHeight: 1.1,
