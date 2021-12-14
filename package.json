@@ -4,6 +4,7 @@
   "description": "",
   "main": "app.js",
   "dependencies": {
+    "@google-cloud/text-to-speech": "^3.4.0",
     "commander": "^8.3.0",
     "fabric": "^4.6.0",
     "image-data-uri": "^2.0.1",

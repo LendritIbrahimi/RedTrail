@@ -2,6 +2,7 @@ import { ArgumentHandler } from "./src/models/ArgumentHandler.js";
 import Snoowrap from "snoowrap";
 import { Fetcher } from "./src/models/Fetcher.js";
 import { GenerateComment } from "./src/models/image/ImageComment.js";
+import { SoundGenerator } from "./src/models/sound/SoundGenerator.js";
 
 function main() {
   const options = new ArgumentHandler().options;
@@ -15,12 +16,14 @@ function main() {
   });
 
   // A promise that contains fetched posts and comments
-  const fetcher = new Fetcher(options).fetch(wrapper);
+  // const fetcher = new Fetcher(options).fetch(wrapper);
+  const soundGenerator = new SoundGenerator();
 
-  /* This part tests the comment generation
   const fetcher = new Fetcher(options).fetch(wrapper).then((data) => {
     const comments = data.forEach((entity) => {
       entity.comments.forEach((comment) => {
+        // soundGenerator.generate("oneTest", "test.mp3");
+
         GenerateComment(
           comment.text,
           comment.author,
@@ -31,7 +34,6 @@ function main() {
       });
     });
   });
-  */
 }
 
 main();
