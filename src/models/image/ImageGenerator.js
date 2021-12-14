@@ -1,4 +1,5 @@
 import { fabric } from "fabric";
+import { Textbox } from "fabric/fabric-impl";
 import ImageDataURI from "image-data-uri";
 import { properties } from "./ImageProperties.js";
 
@@ -80,7 +81,7 @@ export async function GenerateComment(content, username, postTime, upvotes, prof
   canvas.add(txtUsername, txtPostTime, crcDevider, polDownArrow, polUpArrow, txtUpvotes, crcAvatarBackground);
 
   //#endregion
-  Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {  
+  Content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {
     const newAcc = acc + element;
 
     txtContent.set('text', newAcc);
@@ -89,6 +90,23 @@ export async function GenerateComment(content, username, postTime, upvotes, prof
     return newAcc;
   }, "");
 }
+
+export async function GenerateTitle(content, subreddit, username, postTime, upvotes, comments) {
+  //Create canvas
+  var canvas = new fabric.StaticCanvas("canvas", properties.canvas);
+
+  //Register font
+  fabric.nodeCanvas.registerFont("src/assets/fonts/OpenSans-Regular.ttf", properties.font);
+
+  var txtContent = new fabric.Textbox(content, {
+    ...properties.txtContent,
+    width: canvas.width - 80,
+    top: canvas.height * 0.5,
+    fontSize: 60,
+  });
+
+}
+
 
 async function DataURLtoPNG(canvas, name) {
   //Return DataURL from canvas
