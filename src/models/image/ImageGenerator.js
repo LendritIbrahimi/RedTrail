@@ -105,6 +105,8 @@ export async function GenerateTitle(content, subreddit, username, postTime, upvo
     fontSize: 60,
   });
 
+  canvas.add(txtContent);
+  DataURLtoPNG(canvas, "title");
 }
 
 
