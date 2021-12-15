@@ -9,6 +9,7 @@ lerna-debug.log*
 #images
 *.png
 output/
+data/
 
 # Bat
 *.bat
