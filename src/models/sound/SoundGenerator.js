@@ -1,24 +1,27 @@
-import util from "util";
+import * as googleTTS from "google-tts-api";
 import fs from "fs";
-import textToSpeech from "@google-cloud/text-to-speech";
 
 class SoundGenerator {
-  constructor() {
-    this.client = new textToSpeech.TextToSpeechClient();
-    this.voice = { languageCode: "en-US", ssmlGender: "NEUTRAL" };
-    this.audioConfig = { audioEncoding: "MP3" };
+  constructor(path) {
+    this.path = path;
+    this.properties = {
+      lang: "en",
+      slow: false,
+      host: "https://translate.google.com",
+      timeout: 10000,
+    };
   }
 
-  async generate(text, path) {
-    const request = {
-      input: { text },
-      voice: this.voice,
-      audioConfig: this.audioConfig,
-    };
-
-    const [response] = await client.synthesizeSpeech(request);
-    const writeFile = util.promisify(fs.writeFile);
-    await writeFile(path, response.audioContent, "binary");
+  async generate(folderName, text) {
+    googleTTS
+      .getAudioBase64(text, this.properties)
+      .then((base64) => {
+        fs.writeFileSync(
+          `${this.path}/${folderName}/sound.mp3`,
+          Buffer.from(base64.replace("data:audio/ogg; codecs=opus;base64,", ""), "base64")
+        );
+      })
+      .catch(console.error);
   }
 }
 

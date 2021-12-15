@@ -16,15 +16,23 @@ function main() {
   });
 
   // A promise that contains fetched posts and comments
-  // const fetcher = new Fetcher(options).fetch(wrapper);
-  const soundGenerator = new SoundGenerator();
+  const rootDir = "data/";
+  const soundGenerator = new SoundGenerator(rootDir);
+  const imageGenerator = new ImageGenerator(rootDir);
 
-  const fetcher = new Fetcher(options).fetch(wrapper).then((data) => {
-    const comments = data.forEach((entity) => {
-      entity.comments.forEach((comment, index) => {
-        // soundGenerator.generate(comment.text, `test${index}.mp3`);
+  new Fetcher(options).fetch(wrapper).then((data) => {
+    data.forEach((entity) => {
+      entity.comments.forEach((comment) => {
+        const folderName = comment.text
+          .substr(0, 20)
+          .toLowerCase()
+          .trim()
+          .replace(/[\W_]+/g, "_");
 
-        ImageGenerator(
+        soundGenerator.generate(folderName, comment.text);
+
+        imageGenerator.generateComment(
+          folderName,
           comment.text,
           comment.author,
           comment.ups.toString(),

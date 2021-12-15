@@ -7,6 +7,7 @@
     "@google-cloud/text-to-speech": "^3.4.0",
     "commander": "^8.3.0",
     "fabric": "^4.6.0",
+    "google-tts-api": "^2.0.2",
     "image-data-uri": "^2.0.1",
     "snoowrap": "^1.23.0"
   },

@@ -2,104 +2,118 @@ import { fabric } from "fabric";
 import ImageDataURI from "image-data-uri";
 import { properties } from "./ImageProperties.js";
 
-export async function ImageGenerator(content, username, postTime, upvotes, profilePicture) {
-  //Create canvas
-  var canvas = new fabric.StaticCanvas("canvas", properties.canvas);
+export class ImageGenerator {
+  constructor(path) {
+    this.path = path;
 
-  //Register font
-  fabric.nodeCanvas.registerFont("src/assets/fonts/OpenSans-Regular.ttf", properties.font);
+    fabric.nodeCanvas.registerFont("src/assets/fonts/OpenSans-Regular.ttf", properties.font);
+  }
 
-  //For the content height which we will use to determine the top and bottom sections
-  var txtContent = new fabric.Textbox(content, {
-    ...properties.txtContent,
-    width: canvas.width - 80,
-    top: canvas.height * 0.5,
-  });
+  generateComment(folderName, content, username, postTime, upvotes, profilePicture) {
+    var canvas = new fabric.StaticCanvas("canvas", properties.canvas);
 
-  //#region Top
-  var crcAvatarBackground = new fabric.Circle({
-    ...properties.crcAvatarBackground,
-    left: txtContent.left - 10,
-    top: txtContent.top - txtContent.height / 2 - 75,
-  });
-
-  fabric.Image.fromURL(profilePicture, (img) => {
-    img.set({
-      originY: "bottom",
-      originX: "center",
-      top: crcAvatarBackground.top - 2 + crcAvatarBackground.height / 2,
-      left: crcAvatarBackground.left + crcAvatarBackground.width / 2,
+    // content
+    var txtContent = new fabric.Textbox(content, {
+      ...properties.txtContent,
+      width: canvas.width - 80,
+      top: canvas.height * 0.5,
     });
-    img.scaleToHeight(crcAvatarBackground.radius * 2.25);
-    img.scaleToWidth(crcAvatarBackground.radius * 2.25);
-    canvas.add(img);
-  });
 
-  //Add username
-  var txtUsername = new fabric.Textbox(username, {
-    ...properties.txtUsername,
-    top: crcAvatarBackground.top,
-    left: crcAvatarBackground.left + crcAvatarBackground.width + 25,
-  });
+    var crcAvatarBackground = new fabric.Circle({
+      ...properties.crcAvatarBackground,
+      left: txtContent.left - 10,
+      top: txtContent.top - txtContent.height / 2 - 75,
+    });
 
-  var crcDevider = new fabric.Circle({
-    ...properties.crcDivider,
-    left: txtUsername.left + txtUsername.width + 20,
-    top: txtUsername.top,
-  });
+    // username
+    var txtUsername = new fabric.Textbox(username, {
+      ...properties.txtUsername,
+      top: crcAvatarBackground.top,
+      left: crcAvatarBackground.left + crcAvatarBackground.width + 25,
+    });
 
-  var txtPostTime = new fabric.Textbox(postTime, {
-    ...properties.txtPostTime,
-    left: crcDevider.left + crcDevider.width + 15,
-    width: canvas.width - 60,
-    top: crcDevider.top,
-  });
-  //#endregion
+    var crcDevider = new fabric.Circle({
+      ...properties.crcDivider,
+      left: txtUsername.left + txtUsername.width + 20,
+      top: txtUsername.top,
+    });
 
-  //#region Bottom
-  var txtUpvotes = new fabric.Textbox(upvotes, {
-    ...properties.txtUpVotes,
-    top: txtContent.top + txtContent.height / 2 + 50,
-    left: txtContent.width - 120,
-  });
+    // postTime
+    var txtPostTime = new fabric.Textbox(postTime, {
+      ...properties.txtPostTime,
+      left: crcDevider.left + crcDevider.width + 15,
+      width: canvas.width - 60,
+      top: crcDevider.top,
+    });
 
-  var polDownArrow = new fabric.Polygon(properties.polArrowCoords, {
-    ...properties.polArrow,
-    scaleY: 1.25,
-    top: txtUpvotes.top,
-    left: txtUpvotes.left + txtUpvotes.width,
-  });
+    // upvotes
+    var txtUpvotes = new fabric.Textbox(upvotes, {
+      ...properties.txtUpVotes,
+      top: txtContent.top + txtContent.height / 2 + 50,
+      left: txtContent.width - 120,
+    });
 
-  var polUpArrow = new fabric.Polygon(properties.polArrowCoords, {
-    ...properties.polArrow,
-    originX: "right",
-    scaleY: -1.25,
-    top: txtUpvotes.top,
-    left: txtUpvotes.left - txtUpvotes.width,
-  });
+    // profilePicture
+    fabric.Image.fromURL(profilePicture, (img) => {
+      img.set({
+        originY: "bottom",
+        originX: "center",
+        top: crcAvatarBackground.top - 2 + crcAvatarBackground.height / 2,
+        left: crcAvatarBackground.left + crcAvatarBackground.width / 2,
+      });
+      img.scaleToHeight(crcAvatarBackground.radius * 2.25);
+      img.scaleToWidth(crcAvatarBackground.radius * 2.25);
+      canvas.add(img);
+    });
 
-  txtContent.set({ originY: "top", top: canvas.height * 0.5 - txtContent.height * 0.5 });
+    // additional drawings
+    var crcDevider = new fabric.Circle({
+      ...properties.crcDivider,
+      left: txtUsername.left + txtUsername.width + 20,
+      top: txtUsername.top,
+    });
 
-  canvas.add(
-    txtContent,
-    txtUsername,
-    txtPostTime,
-    crcDevider,
-    polDownArrow,
-    polUpArrow,
-    txtUpvotes,
-    crcAvatarBackground
-  );
+    var polDownArrow = new fabric.Polygon(properties.polArrowCoords, {
+      ...properties.polArrow,
+      scaleY: 1.25,
+      top: txtUpvotes.top,
+      left: txtUpvotes.left + txtUpvotes.width,
+    });
 
-  //#endregion
-  content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {
-    const newAcc = acc + element;
+    var polUpArrow = new fabric.Polygon(properties.polArrowCoords, {
+      ...properties.polArrow,
+      originX: "right",
+      scaleY: -1.25,
+      top: txtUpvotes.top,
+      left: txtUpvotes.left - txtUpvotes.width,
+    });
 
-    txtContent.set("text", newAcc);
-    DataURLtoPNG(canvas, "output/image_" + index);
+    txtContent.set({ originY: "top", top: canvas.height * 0.5 - txtContent.height * 0.5 });
 
-    return newAcc;
-  }, "");
+    canvas.add(
+      txtContent,
+      txtUsername,
+      txtPostTime,
+      crcDevider,
+      polDownArrow,
+      polUpArrow,
+      txtUpvotes,
+      crcAvatarBackground
+    );
+
+    content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {
+      const newAcc = acc + element;
+
+      txtContent.set("text", newAcc);
+      DataURLtoPNG(canvas, `${this.path}/${folderName}/image_` + index);
+
+      return newAcc;
+    }, "");
+  }
+
+  generateTitle(content, subreddit, username, postTime, upvotes, comments) {
+    // create your method here
+  }
 }
 
 export async function GenerateTitle(content, subreddit, username, postTime, upvotes, comments) {
@@ -119,7 +133,6 @@ export async function GenerateTitle(content, subreddit, username, postTime, upvo
   canvas.add(txtContent);
   DataURLtoPNG(canvas, "title");
 }
-
 
 async function DataURLtoPNG(canvas, name) {
   //Return DataURL from canvas
