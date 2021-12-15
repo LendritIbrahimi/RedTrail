@@ -2,8 +2,7 @@ import * as googleTTS from "google-tts-api";
 import fs from "fs";
 
 class SoundGenerator {
-  constructor(path) {
-    this.path = path;
+  constructor() {
     this.properties = {
       lang: "en",
       slow: false,
@@ -12,12 +11,12 @@ class SoundGenerator {
     };
   }
 
-  async generate(folderName, text) {
+  async generate(fileName, text) {
     googleTTS
       .getAudioBase64(text, this.properties)
       .then((base64) => {
         fs.writeFileSync(
-          `${this.path}/${folderName}/sound.mp3`,
+          `${fileName}.mp3`,
           Buffer.from(base64.replace("data:audio/ogg; codecs=opus;base64,", ""), "base64")
         );
       })

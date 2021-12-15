@@ -16,9 +16,8 @@ function main() {
   });
 
   // A promise that contains fetched posts and comments
-  const rootDir = "data/";
-  const soundGenerator = new SoundGenerator(rootDir);
-  const imageGenerator = new ImageGenerator(rootDir);
+  const soundGenerator = new SoundGenerator();
+  const imageGenerator = new ImageGenerator("data/", soundGenerator);
 
   new Fetcher(options).fetch(wrapper).then((data) => {
     data.forEach((entity) => {
@@ -28,8 +27,6 @@ function main() {
           .toLowerCase()
           .trim()
           .replace(/[\W_]+/g, "_");
-
-        soundGenerator.generate(folderName, comment.text);
 
         imageGenerator.generateComment(
           folderName,

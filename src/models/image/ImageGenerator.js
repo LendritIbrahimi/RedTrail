@@ -3,8 +3,9 @@ import ImageDataURI from "image-data-uri";
 import { properties } from "./ImageProperties.js";
 
 export class ImageGenerator {
-  constructor(path) {
+  constructor(path, soundGenerator) {
     this.path = path;
+    this.soundGenerator = soundGenerator;
 
     fabric.nodeCanvas.registerFont("src/assets/fonts/OpenSans-Regular.ttf", properties.font);
   }
@@ -104,8 +105,15 @@ export class ImageGenerator {
     content.match(/([^\.!\?]+[\.!\?]+)|([^\.!\?]+$)/g).reduce((acc, element, index) => {
       const newAcc = acc + element;
 
+      const imageName = `image_${index}`;
+      const soundName = `sound_${index}`;
+      const exportPath = `${this.path}/${folderName}/`;
+
       txtContent.set("text", newAcc);
-      DataURLtoPNG(canvas, `${this.path}/${folderName}/image_` + index);
+      DataURLtoPNG(canvas, exportPath.concat(imageName));
+
+      // generate sound only for the part after dot (.)
+      this.soundGenerator.generate(exportPath.concat(soundName), element);
 
       return newAcc;
     }, "");
