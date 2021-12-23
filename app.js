@@ -32,8 +32,8 @@ function main() {
           folderName,
           comment.text,
           comment.author,
+          "15m",
           comment.ups.toString(),
-          "1.5k",
           "https://styles.redditmedia.com/t5_50qpes/styles/profileIcon_snoo78944d19-7998-4dd1-8b34-df9a8b6ba99c-headshot.png"
         );
       });
