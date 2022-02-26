@@ -1,6 +1,6 @@
 # RedTrail &middot; [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/LendritIbrahimi/RedTrail/blob/main/LICENSE)
 
-RedTrail is an application that allows the generation of a narrated video from reddit posts.
+RedTrail is an application in development that allows the generation of a narrated video from reddit posts.
 
 ## Installation
 
